@@ -114,7 +114,7 @@ def main(argv):
     )
     parser.add_argument(
         "--with_wandb_logger",
-        action="store_true",
+        action="store_false",
         help="Use wandB for logging the training progress"
     )
 
