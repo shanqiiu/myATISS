@@ -12,6 +12,9 @@ import trimesh
 
 from simple_3dviz.renderables.textured_mesh import Material, TexturedMesh
 
+# 此处为修改部分：https://github.com/nv-tlabs/ATISS/issues/3#issuecomment-996769733
+from simple_3dviz.io import read_mesh_file
+from simple_3dviz import Mesh
 
 def get_textured_objects(bbox_params_t, objects_dataset, classes):
     # For each one of the boxes replace them with an object
@@ -25,8 +28,24 @@ def get_textured_objects(bbox_params_t, objects_dataset, classes):
             query_label, query_size
         )
 
+        # # Load the furniture and scale it as it is given in the dataset
+        # raw_mesh = TexturedMesh.from_file(furniture.raw_model_path)
+        
         # Load the furniture and scale it as it is given in the dataset
-        raw_mesh = TexturedMesh.from_file(furniture.raw_model_path)
+        try:
+            raw_mesh = TexturedMesh.from_file(furniture.raw_model_path)
+        except:
+            try:
+                texture_path = furniture.texture_image_path
+                mesh_info = read_mesh_file(furniture.raw_model_path)
+                vertices = mesh_info.vertices
+                normals = mesh_info.normals
+                uv = mesh_info.uv
+                material = Material.with_texture_image(texture_path)
+                raw_mesh = TexturedMesh(vertices,normals,uv,material)
+            except:
+                print("Failed loading texture info.")
+                raw_mesh = Mesh.from_file(furniture.raw_model_path)
         raw_mesh.scale(furniture.scale)
 
         # Compute the centroid of the vertices in order to match the
